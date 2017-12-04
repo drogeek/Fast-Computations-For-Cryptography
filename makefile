@@ -1,2 +1,3 @@
+ARGS=-Wall -Wextra -lgmp -g
 karatsuba: karatsuba.c
-	gcc karatsuba.c -Wall -Wextra -o karatsuba
+	gcc karatsuba.c $(ARGS) -o karatsuba

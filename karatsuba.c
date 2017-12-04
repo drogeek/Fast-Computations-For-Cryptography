@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <gmp.h>
 
 typedef unsigned int uint;
 typedef struct
 {
   uint degree;
   //from least to most representative degree
-  uint* data;
+  mpz_t* data;
 }Poly;
 
 void init_poly(Poly* p, uint* coeffs, uint degree);
@@ -16,6 +17,7 @@ Poly shiftPoly(Poly *a,uint shift);
 Poly* dividePoly(Poly p);
 Poly karatsuba(Poly a, Poly b);
 Poly negativePoly(Poly p);
+void printPoly(Poly p);
 
 int main(void)
 {
@@ -24,23 +26,36 @@ int main(void)
   uint data2[] = { 2, 1, 1, 3 };
   init_poly(&p1,data2,3);
   init_poly(&p,data,3);
-  uint i;
   result = karatsuba(p,p1);
-  for (i=0;i<result.degree+1;i++)
-    printf("%d\n",result.data[i]);
+  printPoly(result);
   return EXIT_SUCCESS;
+}
+
+void printPoly(Poly p)
+{
+  uint i;
+  for (i=0;i<p.degree+1;i++)
+  {
+    printf(mpz_get_str(NULL,10,p.data[i]));
+	printf(" ");
+  }
 }
 
 void init_poly_zero(Poly* p, uint degree)
 {
   p->degree = degree;
-  p->data = calloc(degree+1,sizeof(uint));
+  p->data = malloc(sizeof(mpz_t)*(degree+1));
+  uint i;
+  for(i=0;i<degree+1;i++)
+  	mpz_init(p->data[i]);
 }
 
 void init_poly(Poly* p, uint* coeffs, uint degree)
 {
-  p->degree = degree;
-  p->data = coeffs;
+	init_poly_zero(p,degree);
+	uint i;
+	for (i=0;i<p->degree+1;i++)
+		mpz_set_ui(p->data[i],coeffs[i]);
 }
 
 Poly addPoly(Poly a, Poly b)
@@ -55,13 +70,13 @@ Poly addPoly(Poly a, Poly b)
   }
 
   result->degree = a.degree;
-  result->data = malloc(sizeof(uint)*(result->degree+1));
+  result->data = malloc(sizeof(mpz_t)*(result->degree+1));
   uint i;
   for(i=0;i<b.degree+1;i++)
-    result->data[i] = a.data[i] + b.data[i]; 
+  	mpz_add(result->data[i],a.data[i],b.data[i]);
   while(i<a.degree+1)
   {
-  	result->data[i] = a.data[i];
+  	mpz_set(result->data[i],a.data[i]);
 	i++;
   }
   return *result;
@@ -72,20 +87,25 @@ Poly negativePoly(Poly p)
 	Poly* result = malloc(sizeof(Poly));
 	uint i;
 	result->degree = p.degree;
-	result->data = malloc(sizeof(uint)*(result->degree+1));
+	result->data = malloc(sizeof(mpz_t)*(result->degree+1));
 	for(i=0;i<p.degree+1;i++)
-		result->data[i]= -p.data[i];
+		mpz_neg(result->data[i],p.data[i]);
 	return *result;
 }
 
 Poly shiftPoly(Poly *a,uint shift)
 {
   uint i, newDegree=a->degree+shift;
-  uint* newData=calloc(newDegree+1,sizeof(uint));
-  for(i=0;i<a->degree+1;i++)
-    newData[i+shift] = a->data[i];
-  a->degree = newDegree;
-  a->data = newData;
+
+  //we save the data, we'll need it right after
+  Poly savedPoly;
+  savedPoly.degree = a->degree;
+  savedPoly.data = a->data;
+
+  init_poly_zero(a,newDegree);
+
+  for(i=0;i<savedPoly.degree+1;i++)
+    mpz_set(a->data[i+shift], savedPoly.data[i]);
   return *a;
 }
 
@@ -96,15 +116,13 @@ Poly* dividePoly(Poly p)
 	uint i, newdegree=p.degree/2;
 
 	for(i=0;i<2;i++)
-	{
-		result[i].degree = newdegree;
-		result[i].data = malloc(sizeof(uint)*(newdegree+1));
-	}
+		init_poly_zero(&result[i],newdegree);
 
 	for(i=0;i<newdegree+1;i++)
-		result[0].data[i]=p.data[i];
-	for(i=0;i<newdegree+1;i++)
-		result[1].data[i]=p.data[i+newdegree+1];
+	{
+		mpz_set(result[0].data[i],p.data[i]);
+		mpz_set(result[1].data[i],p.data[i+newdegree+1]);
+	}
 	return result;
 }
 
@@ -113,8 +131,8 @@ Poly karatsuba(Poly a, Poly b)
 	Poly *result=malloc(sizeof(Poly));
 	if(a.degree == 0)
 	{
-		result->data = malloc(sizeof(uint));
-		result->data[0] = a.data[0] * b.data[0];
+		init_poly_zero(result,0);
+		mpz_mul(result->data[0],a.data[0],b.data[0]);
 	}
 
 	else
