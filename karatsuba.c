@@ -19,20 +19,15 @@ Poly negativePoly(Poly p);
 
 int main(void)
 {
-  Poly p,p1;
+  Poly p,p1,result;
   uint data[] = { 1, 1, 3, 5 };
   uint data2[] = { 2, 1, 1, 3 };
   init_poly(&p1,data2,3);
   init_poly(&p,data,3);
-  uint i,j;
-  shiftPoly(&p,2);
-  Poly p2 = addPoly(p,p1);
-  Poly* polys = dividePoly(p2);
-  for(j=0;j<2;j++)
-  {
-	  for(i=0; i<polys[j].degree+1; i++)
-		printf("%d\n",polys[j].data[i]);
-  }
+  uint i;
+  result = karatsuba(p,p1);
+  for (i=0;i<result.degree+1;i++)
+    printf("%d\n",result.data[i]);
   return EXIT_SUCCESS;
 }
 
