@@ -2,14 +2,14 @@
 #define _EXTEUCLID_
 #include <stdio.h>
 #include <stdlib.h>
-typedef unsigned int uint ;
+typedef unsigned int uint;
 typedef struct _extEucRes
 {
   uint r;
-  uint u;
-  uint v;
+  int u;
+  int v;
 }ExtEucRes;
 
-ExtEucRes extendedEuclid(uint a, uint b);
+ExtEucRes extendedEuclid(int a, int b);
 
 #endif
