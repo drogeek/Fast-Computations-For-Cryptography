@@ -6,7 +6,7 @@ karatsuba: karatsuba.c polynome.o
 polynome.o: polynome.h polynome.c
 	$(CC) -c polynome.c $(ARGS) 
 
-extendedEuclid.o: extendedEuclid.o
+extendedEuclid.o: extendedEuclid.c extendedEuclid.h
 	$(CC) -c extendedEuclid.c $(ARGS)
 
 montgomery: montgomery.c extendedEuclid.o

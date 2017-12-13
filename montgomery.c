@@ -18,16 +18,34 @@ uint REDC(const uint t,const uint r,const uint n,const int neg_inv_n)
 	else
 		return res;
 }
-uint repr_Montgomery(uint x,uint R, uint N)
+
+uint bin_Size(int nbr)
 {
-	//x<<=powerOfTwo;
-	x=x*R;
-	return x%N; // is that expensive?
+  uint result=0;
+  while(nbr)
+  {
+    nbr>>1;
+    result++;
+  }
+  return result;
+}
+
+//we assume p odd
+uint reduction_Montgomery(uint m, uint p)
+{
+  ExtEucRes extEucRes = extendedEuclid(p,1>>n);
+  int Q = m*extEucRes.u;
+  return ( (m-Q*p)<<n )%p;
+}
+
+uint repr_Montgomery(uint x,uint p, uint n)
+{
+	x=( x<<n )%p;
 }
 
 int main(int argc, char** argv)
 {
-	ExtEucRes extEucRes;
+	//ExtEucRes extEucRes;
 	/*
 	uint powerOfTwo=DEFAULT_PW_R;
 	do
@@ -38,7 +56,6 @@ int main(int argc, char** argv)
 		extEucRes=extendedEuclid(1<<powerOfTwo,n);
 		powerOfTwo++;
 	}
-	*/
 	
 	uint N=17,R=10;
 	uint a=repr_Montgomery(7,R,N);
@@ -48,6 +65,8 @@ int main(int argc, char** argv)
 	extEucRes=extendedEuclid(R,N);
 	printf("%u %d %d\n", extEucRes.r, extEucRes.u, extEucRes.v);
 	printf("%u\n",REDC(a*b,R,N,extEucRes.v));
+	*/
 
+  printf("%d\n", reduction_Montgomery(52,15,1<<));
   return EXIT_SUCCESS;
 }
