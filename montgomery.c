@@ -24,7 +24,7 @@ uint bin_Size(int nbr)
   uint result=0;
   while(nbr)
   {
-    nbr>>1;
+    nbr>>=1;
     result++;
   }
   return result;
@@ -33,9 +33,10 @@ uint bin_Size(int nbr)
 //we assume p odd
 uint reduction_Montgomery(uint m, uint p)
 {
-  ExtEucRes extEucRes = extendedEuclid(p,1>>n);
+  uint n = bin_Size(p)*2;
+  ExtEucRes extEucRes = extendedEuclid(p,1<<n);
   int Q = m*extEucRes.u;
-  return ( (m-Q*p)<<n )%p;
+  return ( m-Q*p*extEucRes.v )%p;
 }
 
 uint repr_Montgomery(uint x,uint p, uint n)
@@ -67,6 +68,6 @@ int main(int argc, char** argv)
 	printf("%u\n",REDC(a*b,R,N,extEucRes.v));
 	*/
 
-  printf("%d\n", reduction_Montgomery(52,15,1<<));
+  printf("%d\n", reduction_Montgomery(156,17));
   return EXIT_SUCCESS;
 }
