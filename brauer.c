@@ -21,7 +21,10 @@ void brauer(mpz_t y,mpz_t x, BaseW nbr, mpz_t p)
   for(i=nbr.degree-2;i>=0;i--)
   {
     for(j=0;j<nbr.w;j++)
-      mpz_powm_ui(y,y,2,p);
+	{
+      mpz_mul(y,y,y);
+	  mpz_mod(y,y,p);
+  	}
     mpz_mul(y,y,precalculs[nbr.coeffs[i]]);
     mpz_mod(y,y,p);
   }
@@ -35,7 +38,7 @@ int main(int argc, char** argv)
   mpz_init(test);
   mpz_init_set_str(a,"193453341234123412341234123412341235",10);
   mpz_init_set_str(b,"2345226896544787654345678765433223",10);
-  mpz_init_set_str(p,"173",10);
+  mpz_init_set_str(p,"173444342111244",10);
   brauer(result,a,decomp_base_2expw(b,6),p);
   mpz_powm(test,a,b,p);
   mpz_out_str(stdout,10,result);
