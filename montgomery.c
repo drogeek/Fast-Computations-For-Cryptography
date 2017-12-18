@@ -19,16 +19,7 @@ uint REDC(const uint t,const uint r,const uint n,const int neg_inv_n)
 		return res;
 }
 
-uint bin_Size(int nbr)
-{
-  uint result=0;
-  while(nbr)
-  {
-    nbr>>=1;
-    result++;
-  }
-  return result;
-}
+
 
 //we assume p odd
 uint reduction_Montgomery(uint m, uint p)
