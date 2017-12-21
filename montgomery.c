@@ -8,7 +8,7 @@ uint reduc_Montgomery(uint m, uint p, uint n, uint inv_p)
 
 void reduc_Montgomery_gmp(mpz_t result, mpz_t m, mpz_t p, uint n, mpz_t inv_p)
 {
-	mpz_t Q,product,N,ninv_p;
+	mpz_t Q,product,mask_modulus,ninv_p;
 
 	mpz_init(ninv_p);
 	mpz_t exp2n;
@@ -16,12 +16,13 @@ void reduc_Montgomery_gmp(mpz_t result, mpz_t m, mpz_t p, uint n, mpz_t inv_p)
 	mpz_mul_2exp(exp2n,exp2n,n);
 	mpz_sub(ninv_p,exp2n,inv_p);
 
-	mpz_init_set_ui(N,1);
-	mpz_mul_2exp(N,N,n);
+	mpz_init_set_ui(mask_modulus,1);
+	mpz_mul_2exp(mask_modulus,mask_modulus,n);
+	mpz_sub_ui(mask_modulus,mask_modulus,1);
 
 	mpz_init(Q);
 	mpz_mul(Q,m,ninv_p);
-	mpz_mod(Q,Q,N);
+	mpz_and(Q,Q,mask_modulus);
 
 	mpz_init(product);
 	mpz_mul(product,Q,p);
