@@ -28,6 +28,8 @@ void brauer(mpz_t y,mpz_t x, BaseW nbr, mpz_t p)
     mpz_mul(y,y,precalculs[nbr.coeffs[i]]);
     mpz_mod(y,y,p);
   }
+  for(i=0;i<1<<nbr.w;i++)
+  	mpz_clear(precalculs[i]);
   free(precalculs);
 }
 
