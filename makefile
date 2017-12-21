@@ -13,8 +13,8 @@ extendedEuclid.o: extendedEuclid.c extendedEuclid.h
 binaryOperation.o: binaryOperation.h binaryOperation.c
 	$(CC) -c binaryOperation.c $(ARGS)
 
-montgomery.o: montgomery.c extendedEuclid.o binaryOperation.o
-	$(CC) -c montgomery.c extendedEuclid.o binaryOperation.o $(ARGS)
+montgomery.o: montgomery.c
+	$(CC) -c montgomery.c $(ARGS)
 
 brauer: brauer.c binaryOperation.o
 	$(CC) brauer.c  binaryOperation.o $(ARGS) -o brauer 
