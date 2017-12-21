@@ -32,6 +32,8 @@ void reduc_Montgomery_gmp(mpz_t result, mpz_t m, mpz_t p, uint n, mpz_t inv_p)
 		mpz_sub(result,result,p);
 	mpz_clear(Q);
 	mpz_clear(product);
+	mpz_clear(mask_modulus);
+	mpz_clear(ninv_p);
 }
 
 uint repr_Montgomery(uint x,uint p, uint n)
