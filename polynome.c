@@ -71,8 +71,16 @@ Poly* dividePoly(Poly p)
 	}
 
 	for(i=0;i<newdegree+1;i++)
+	{
 		result[0].data[i]=p.data[i];
-	for(i=0;i<newdegree+1;i++)
 		result[1].data[i]=p.data[i+newdegree+1];
+	}
 	return result;
+}
+
+void freePoly(Poly p)
+{
+	free(p.data[0]);
+	free(p.data[1]);
+	free(p);
 }

@@ -17,6 +17,7 @@ Poly addPoly(Poly a, Poly b);
 Poly shiftPoly(Poly *a,uint shift);
 Poly* dividePoly(Poly p);
 Poly negativePoly(Poly p);
+void freePoly(Poly p);
 
 
 #endif
