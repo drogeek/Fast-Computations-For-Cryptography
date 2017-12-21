@@ -41,6 +41,20 @@ uint repr_Montgomery(uint x,uint p, uint n)
 	return (x<<n)%p;
 }
 
+//stores -p^{-1} mod 2^{n} in neg_inv_p and returns size of p
+uint init_Montgomery_gmp(mpz_t neg_inv_p, mpz_t p)
+{
+	uint n = bin_Size_gmp(p);
+	mpz_t twoPowN;
+	//we compute -p^{-1} mod 2^{n}
+	mpz_init_set_ui(twoPowN,1);
+	mpz_mul_2exp(twoPowN,twoPowN,n);
+	ExtEucResGMP extEucRes= extendedEuclid_gmp(p,twoPowN);
+	mpz_sub(neg_inv_p,twoPowN,extEucRes.u);
+	mpz_clear(twoPowN);
+	return n;
+}
+
 void repr_Montgomery_gmp(mpz_t result,mpz_t x,mpz_t p, uint n)
 {
 	mpz_mul_2exp(result,x,n);
