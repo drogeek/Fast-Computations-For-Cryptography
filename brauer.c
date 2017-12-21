@@ -10,6 +10,7 @@ void brauer(mpz_t y,mpz_t x, BaseW nbr, mpz_t p)
   mpz_init_set_ui(precalculs[0],1);
 
   int i,j;
+  //we precompute [x^1,…,x^{2^{w}-1}]
   for(i=1;i<1<<nbr.w;i++)
   {
     mpz_init(precalculs[i]);

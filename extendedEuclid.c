@@ -79,6 +79,9 @@ ExtEucResGMP extendedEuclid_gmp(mpz_t a, mpz_t b)
   return res;
 }
 
+//we make sure that 
+//u*a % b = 1 with 0<=u<b
+//v*b % a = 1 with 0<=v<a
 void reallignExtEuc_gmp(ExtEucResGMP* e, mpz_t a, mpz_t b)
 {
 	while(mpz_cmp_ui(e->u,0) < 0)
