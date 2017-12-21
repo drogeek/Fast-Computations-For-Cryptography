@@ -17,3 +17,6 @@ montgomery: montgomery.c extendedEuclid.o binaryOperation.o
 
 brauer: brauer.c binaryOperation.o
 	$(CC) brauer.c  binaryOperation.o $(ARGS) -o brauer 
+
+squareMultiply: squareMultiply.c binaryOperation.o montgomery.o extendedEuclid.o
+	$(CC) squareMultiply.c binaryOperation.o montgomery.o extendedEuclid.o $(ARGS) -o squareMultiply

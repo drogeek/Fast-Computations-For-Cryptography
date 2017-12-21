@@ -22,10 +22,11 @@ uint bin_Size_gmp(mpz_t nbr)
     mpz_tdiv_q_2exp(tmp,tmp,1);
     size++;
   }
+  mpz_clear(tmp);
   return size;
 }
 
-// w must be > 32
+// w must be < 32
 BaseW decomp_base_2expw(mpz_t nbr, uint w)
 {
   BaseW result;

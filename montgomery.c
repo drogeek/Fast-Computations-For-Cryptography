@@ -1,64 +1,45 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "extendedEuclid.h"
-
-typedef unsigned int uint;
-
-#define DEFAULT_PW_R 5
-
-uint REDC(const uint t,const uint r,const uint n,const int neg_inv_n)
+#include "montgomery.h"
+//we assume p odd
+uint reduc_Montgomery(uint m, uint p, uint n, uint inv_p)
 {
-	printf("t=%u\n",t);
-	printf("invn=%d", (neg_inv_n*n)%r);
-	uint res;
-	uint m = ((t%r)*neg_inv_n)%r;
-	res = (t+m*n)<<r;
-	if (res >= n)
-		return res-n;
-	else
-		return res;
+  int Q = m*inv_p;
+  return (m-Q*p)>>n ;
 }
 
-
-
-//we assume p odd
-uint reduction_Montgomery(uint m, uint p)
+void reduc_Montgomery_gmp(mpz_t result, mpz_t m, mpz_t p, uint n, mpz_t inv_p)
 {
-  uint n = bin_Size(p)*2;
-  ExtEucRes extEucRes = extendedEuclid(p,1<<n);
-  int Q = m*extEucRes.u;
-  return ( m-Q*p*extEucRes.v )%p;
+	mpz_t Q,product,N,ninv_p;
+
+	mpz_init(ninv_p);
+	mpz_t exp2n;
+	mpz_init_set_ui(exp2n,1);
+	mpz_mul_2exp(exp2n,exp2n,n);
+	mpz_sub(ninv_p,exp2n,inv_p);
+
+	mpz_init_set_ui(N,1);
+	mpz_mul_2exp(N,N,n);
+
+	mpz_init(Q);
+	mpz_mul(Q,m,ninv_p);
+	mpz_mod(Q,Q,N);
+
+	mpz_init(product);
+	mpz_mul(product,Q,p);
+	mpz_add(result,m,product);
+	mpz_tdiv_q_2exp(result,result,n);
+	if( mpz_cmp(result,p) >= 0 )
+		mpz_sub(result,result,p);
+	mpz_clear(Q);
+	mpz_clear(product);
 }
 
 uint repr_Montgomery(uint x,uint p, uint n)
 {
-	x=( x<<n )%p;
+	return ( x<<n )%p;
 }
 
-int main(int argc, char** argv)
+void repr_Montgomery_gmp(mpz_t result,mpz_t x,mpz_t p, uint n)
 {
-	//ExtEucRes extEucRes;
-	/*
-	uint powerOfTwo=DEFAULT_PW_R;
-	do
-	//we wanta power of 2 that is coprime with n
-	//note that this is useless if n is odd
-	while(extEucRes.r-1)
-	{
-		extEucRes=extendedEuclid(1<<powerOfTwo,n);
-		powerOfTwo++;
-	}
-	
-	uint N=17,R=10;
-	uint a=repr_Montgomery(7,R,N);
-	printf("a=%u\n",a);
-	uint b=repr_Montgomery(15,R,N);
-	printf("b=%u\n",b);
-	extEucRes=extendedEuclid(R,N);
-	printf("%u %d %d\n", extEucRes.r, extEucRes.u, extEucRes.v);
-	printf("%u\n",REDC(a*b,R,N,extEucRes.v));
-	*/
-
-  printf("%d\n", reduction_Montgomery(156,17));
-  return EXIT_SUCCESS;
+	mpz_mul_2exp(result,x,n);
+	mpz_mod(result,result,p);
 }
