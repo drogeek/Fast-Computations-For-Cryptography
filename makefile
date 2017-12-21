@@ -1,5 +1,6 @@
 CC=gcc
 ARGS=-Wall -Wextra -lgmp
+all: karatsuba montgomery brauer squareMultiply
 karatsuba: karatsuba.c polynome.o
 	$(CC) karatsuba.c polynome.o $(ARGS) -o karatsuba
 
@@ -20,3 +21,6 @@ brauer: brauer.c binaryOperation.o
 
 squareMultiply: squareMultiply.c binaryOperation.o montgomery.o extendedEuclid.o
 	$(CC) squareMultiply.c binaryOperation.o montgomery.o extendedEuclid.o $(ARGS) -o squareMultiply
+
+clear:
+	rm *.o karatsuba montgomery brauer squareMultiply
