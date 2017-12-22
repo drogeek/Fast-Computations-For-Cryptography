@@ -1,129 +1,60 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
+#include "polynome.h"
+#include "binaryOperation.h"
 
-typedef unsigned int uint;
-typedef struct
-{
-  uint degree;
-  //from least to most representative degree
-  mpz_t* data;
-}Poly;
 
-void init_poly(Poly* p, uint* coeffs, uint degree);
-void init_poly_zero(Poly* p, uint degree);
-Poly addPoly(Poly a, Poly b);
-Poly shiftPoly(Poly *a,uint shift);
-Poly* dividePoly(Poly p);
 Poly karatsuba(Poly a, Poly b);
-Poly negativePoly(Poly p);
-void printPoly(Poly p);
+Poly convertToPoly( mpz_t nbr, uint sizeCoeff );
+void convertToNbr(mpz_t result, Poly p, uint sizeCoeff);
 
 int main(void)
 {
+  mpz_t a,b,resultNbr;
+  mpz_init(resultNbr);
+  //to simplify, karatsuba takes only polynomes of degree 2^{t}-1
+  //we then have to select a, b and w such that when a and b are divided by w, we get 2^{t} parts
+  //here I took a = 2^{8*4}-1 (size 2^{8*4}) and I substracted 2^{31} to a to get b
+  mpz_init_set_str(a,"4294967295",10);
+  mpz_init_set_str(b,"2147483647",10);
   Poly p,p1,result;
-  uint data[] = { 1, 1, 3, 5 };
-  uint data2[] = { 2, 1, 1, 3 };
-  init_poly(&p1,data2,3);
-  init_poly(&p,data,3);
+  uint w=8;
+  p=convertToPoly(a,w);
+  p1=convertToPoly(b,w);
   result = karatsuba(p,p1);
-  printPoly(result);
+  convertToNbr(resultNbr,result,w);
+  gmp_printf("%Zd\n", resultNbr);
+  /*
+  uint i;
+  for (i=0;i<result.degree+1;i++)
+    printf("%d\n",result.data[i]);
+	*/
   return EXIT_SUCCESS;
 }
 
-void printPoly(Poly p)
-{
-  uint i;
-  for (i=0;i<p.degree+1;i++)
-  {
-    printf(mpz_get_str(NULL,10,p.data[i]));
-	printf(" ");
-  }
-}
-
-void init_poly_zero(Poly* p, uint degree)
-{
-  p->degree = degree;
-  p->data = malloc(sizeof(mpz_t)*(degree+1));
-  uint i;
-  for(i=0;i<degree+1;i++)
-  	mpz_init(p->data[i]);
-}
-
-void init_poly(Poly* p, uint* coeffs, uint degree)
-{
-	init_poly_zero(p,degree);
-	uint i;
-	for (i=0;i<p->degree+1;i++)
-		mpz_set_ui(p->data[i],coeffs[i]);
-}
-
-Poly addPoly(Poly a, Poly b)
-{
-  Poly* result = malloc(sizeof(Poly));
-  // we exchange a and b to ensure deg(a) >= deg(b)
-  if(a.degree < b.degree)
-  {
-  	Poly tmp = a;
-	a=b;
-	b=tmp;
-  }
-
-  result->degree = a.degree;
-  result->data = malloc(sizeof(mpz_t)*(result->degree+1));
-  uint i;
-  for(i=0;i<b.degree+1;i++)
-  	mpz_add(result->data[i],a.data[i],b.data[i]);
-  while(i<a.degree+1)
-  {
-  	mpz_set(result->data[i],a.data[i]);
-	i++;
-  }
-  return *result;
-}
-
-Poly negativePoly(Poly p)
+Poly convertToPoly( mpz_t nbr, uint sizeCoeff )
 {
 	Poly* result = malloc(sizeof(Poly));
-	uint i;
-	result->degree = p.degree;
-	result->data = malloc(sizeof(mpz_t)*(result->degree+1));
-	for(i=0;i<p.degree+1;i++)
-		mpz_neg(result->data[i],p.data[i]);
+	BaseW tmp=decomp_base_2expw(nbr,sizeCoeff);
+	result->data = tmp.coeffs;
+	result->degree = tmp.degree-1;
 	return *result;
 }
 
-Poly shiftPoly(Poly *a,uint shift)
+void convertToNbr(mpz_t result, Poly p, uint sizeCoeff)
 {
-  uint i, newDegree=a->degree+shift;
+	uint i;
+	mpz_t tmp;
+	mpz_init(tmp);
+	mpz_set_ui(result,0);
 
-  //we save the data, we'll need it right after
-  Poly savedPoly;
-  savedPoly.degree = a->degree;
-  savedPoly.data = a->data;
-
-  init_poly_zero(a,newDegree);
-
-  for(i=0;i<savedPoly.degree+1;i++)
-    mpz_set(a->data[i+shift], savedPoly.data[i]);
-  return *a;
-}
-
-//return two polynomes of degree deg(p)/2
-Poly* dividePoly(Poly p)
-{
-	Poly* result = malloc(sizeof(Poly)*2);
-	uint i, newdegree=p.degree/2;
-
-	for(i=0;i<2;i++)
-		init_poly_zero(&result[i],newdegree);
-
-	for(i=0;i<newdegree+1;i++)
+	for(i=0;i<p.degree+1;i++)
 	{
-		mpz_set(result[0].data[i],p.data[i]);
-		mpz_set(result[1].data[i],p.data[i+newdegree+1]);
+		mpz_set_ui(tmp,p.data[i]);
+		mpz_mul_2exp(tmp,tmp,i*sizeCoeff);
+		mpz_add(result,result,tmp);
 	}
-	return result;
 }
 
 Poly karatsuba(Poly a, Poly b)
@@ -131,8 +62,8 @@ Poly karatsuba(Poly a, Poly b)
 	Poly *result=malloc(sizeof(Poly));
 	if(a.degree == 0)
 	{
-		init_poly_zero(result,0);
-		mpz_mul(result->data[0],a.data[0],b.data[0]);
+		result->data = malloc(sizeof(uint));
+		result->data[0] = a.data[0] * b.data[0];
 	}
 
 	else
