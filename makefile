@@ -1,8 +1,8 @@
 CC=gcc
 ARGS=-Wall -Wextra -lgmp
 all: karatsuba brauer squareMultiply
-karatsuba: karatsuba.c polynome.o
-	$(CC) karatsuba.c polynome.o $(ARGS) -o karatsuba
+karatsuba: karatsuba.c polynome.o binaryOperation.o
+	$(CC) karatsuba.c polynome.o binaryOperation.o $(ARGS) -o karatsuba
 
 polynome.o: polynome.h polynome.c
 	$(CC) -c polynome.c $(ARGS) 

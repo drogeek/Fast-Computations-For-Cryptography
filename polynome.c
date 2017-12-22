@@ -82,5 +82,5 @@ void freePoly(Poly p)
 {
 	free(p.data[0]);
 	free(p.data[1]);
-	free(p);
+	free(&p);
 }

@@ -1,25 +1,61 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <gmp.h>
 #include "polynome.h"
+#include "binaryOperation.h"
 
 
 Poly karatsuba(Poly a, Poly b);
+Poly convertToPoly( mpz_t nbr, uint sizeCoeff );
+void convertToNbr(mpz_t result, Poly p, uint sizeCoeff);
 
 int main(void)
 {
+  mpz_t a,b,resultNbr;
+  mpz_init(resultNbr);
+  //to simplify, karatsuba takes only polynomes of degree 2^{t}-1
+  //we then have to select a, b and w such that when a and b are divided by w, we get 2^{t} parts
+  //here I took a = 2^{8*4}-1 (size 2^{8*4}) and I substracted 2^{31} to a to get b
+  mpz_init_set_str(a,"4294967295",10);
+  mpz_init_set_str(b,"2147483647",10);
   Poly p,p1,result;
-  uint data[] = { 1, 1, 3, 5 };
-  uint data2[] = { 2, 1, 1, 3 };
-  init_poly(&p1,data2,3);
-  init_poly(&p,data,3);
-  uint i;
+  uint w=8;
+  p=convertToPoly(a,w);
+  p1=convertToPoly(b,w);
   result = karatsuba(p,p1);
+  convertToNbr(resultNbr,result,w);
+  gmp_printf("%Zd\n", resultNbr);
+  /*
+  uint i;
   for (i=0;i<result.degree+1;i++)
     printf("%d\n",result.data[i]);
+	*/
   return EXIT_SUCCESS;
 }
 
+Poly convertToPoly( mpz_t nbr, uint sizeCoeff )
+{
+	Poly* result = malloc(sizeof(Poly));
+	BaseW tmp=decomp_base_2expw(nbr,sizeCoeff);
+	result->data = tmp.coeffs;
+	result->degree = tmp.degree-1;
+	return *result;
+}
 
+void convertToNbr(mpz_t result, Poly p, uint sizeCoeff)
+{
+	uint i;
+	mpz_t tmp;
+	mpz_init(tmp);
+	mpz_set_ui(result,0);
+
+	for(i=0;i<p.degree+1;i++)
+	{
+		mpz_set_ui(tmp,p.data[i]);
+		mpz_mul_2exp(tmp,tmp,i*sizeCoeff);
+		mpz_add(result,result,tmp);
+	}
+}
 
 Poly karatsuba(Poly a, Poly b)
 {
