@@ -16,11 +16,20 @@ binaryOperation.o: binaryOperation.h binaryOperation.c
 montgomery.o: montgomery.c
 	$(CC) -c montgomery.c $(ARGS)
 
-brauer: brauer.c binaryOperation.o
-	$(CC) brauer.c  binaryOperation.o $(ARGS) -o brauer 
+mersenne.o: mersenne.c
+	$(CC) -c mersenne.c $(ARGS)
 
-squareMultiply: squareMultiply.c binaryOperation.o montgomery.o extendedEuclid.o
-	$(CC) squareMultiply.c binaryOperation.o montgomery.o extendedEuclid.o $(ARGS) -o squareMultiply
+brauer: brauer.c binaryOperation.o mersenne.o
+	$(CC) brauer.c  binaryOperation.o mersenne.o $(ARGS) -o brauer 
+
+squareMultiply: squareMultiply.c binaryOperation.o montgomery.o extendedEuclid.o mersenne.o
+	$(CC) squareMultiply.c binaryOperation.o montgomery.o extendedEuclid.o mersenne.o $(ARGS) -o squareMultiply
+
+question1: squareMultiply
+	python3 average_time_sm.py
+
+question3: brauer
+	python3 average_time_brauer.py
 
 clear:
-	rm *.o karatsuba brauer squareMultiply
+	rm *.o karatsuba brauer squareMultiply montgomery
