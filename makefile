@@ -29,4 +29,4 @@ naf: naf.c list.o
 	$(CC) naf.c list.o $(ARGS) -o naf 
 
 clean:
-	rm *.o karatsuba brauer squareMultiply
+	rm -f *.o karatsuba brauer squareMultiply
