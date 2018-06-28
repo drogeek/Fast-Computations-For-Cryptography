@@ -28,5 +28,5 @@ squareMultiply: squareMultiply.c binaryOperation.o montgomery.o extendedEuclid.o
 naf: naf.c list.o 
 	$(CC) naf.c list.o $(ARGS) -o naf 
 
-clear:
+clean:
 	rm *.o karatsuba brauer squareMultiply
